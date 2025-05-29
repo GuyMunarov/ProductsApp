@@ -10,7 +10,7 @@ public class ProductsManagerTests
     private AppDbContext CreateInMemoryDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("Filename=:memory:") // SQLite in-memory
+            .UseSqlite("Filename=:memory:")
             .Options;
 
         var context = new AppDbContext(options);
