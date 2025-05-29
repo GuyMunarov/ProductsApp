@@ -1,0 +1,18 @@
+﻿using ProductsApp.API.Products.Models;
+
+namespace ProductsApp.API.Products.Managers;
+
+public interface IProductsManager
+{
+    Task<IReadOnlyCollection<ProductViewModel>> GetAll(CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<ProductViewModel>> QueryProducts(
+        string? name,
+        string? color,
+        string? createdBy,
+        CancellationToken cancellationToken);
+
+    Task<ProductViewModel?> GetById(
+        int id,
+        CancellationToken cancellationToken);
+}

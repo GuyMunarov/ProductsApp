@@ -1,0 +1,70 @@
+# Build output
+bin/
+obj/
+out/
+*.dll
+*.exe
+*.app
+*.log
+*.pdb
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+*.nuspec
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+
+# Rider and VSCode
+.idea/
+.vscode/
+*.code-workspace
+
+# ASP.NET secrets & config
+secrets.json
+appsettings.Development.json
+*.db
+
+# EF Core migrations cache
+_MigrationsHistory/
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+*.trx
+
+# Publish artifacts
+publish/
+*.deploy.*
+*.zip
+*.tar.gz
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# JetBrains Rider
+.idea/
+
+# Windows image cache
+ehthumbs.db
+Desktop.ini
+
+# DotCover
+*.dotCover
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Logs
+*.log
+logs/
