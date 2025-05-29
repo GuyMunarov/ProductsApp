@@ -28,7 +28,7 @@ and paste the token inside the dialog (Do not prefix with Bearer!)
 
 
 ![btn](./btn.png )
-![Dialog](./open%20dialog.png.png )
+![Dialog](./open%20dialog.png )
 
 
 ## Products
