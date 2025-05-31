@@ -46,3 +46,30 @@ After the tokens are set you will have access to the products endpoints.
 ## Ecommerce system diagram
 
 ![ecommerce](./ecommerce%20system%20diagram.png)
+
+###	 1. Browsing Products
+The user visits the website, A GET /products request is sent to the API Gateway, which forwards the request to the Products Service.
+The Products Service queries the Producs Database and returns the product list.
+
+### 2. Adding To Cart
+When the user adds a product to their cart, an Add to Cart request is sent to the API Gateway, which routes it to the Products Service.
+The Products Service updates the distributed cache (Redis for example) to reflect the current state of the user's cart.
+
+### 3. Checkout Flow
+When the user clicks Checkout, a Create Order request is sent to the API Gateway, which forwards it to the Orders Service.
+A new order is created with status Pending in the Orders Database.
+The API Gateway then synchronously calls the Payments Service, which:
+1. Initiates a payment request to payment provider
+2. Saves Pending payment record in Payment Database
+3. Returns the payment link to the frontend for a secure IFrame checkout
+
+### 4 Payment Completion
+Once the user completes the payment, a Payment Completed callback is received via the API Gateway and forwarded to the Payments Service, which:
+1. Updates the payment status to Completed in the Payments DB.
+2. Publishes a Change Order Status Event to the Service Bus.
+
+The Orders Service consumes this event, updates the order status accordingly and may notify other services, for example:
+
+1. Shipping Service
+2. Inventory Service
+3. Notification Service (for email confirmations)
