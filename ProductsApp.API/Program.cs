@@ -1,4 +1,6 @@
+using FluentValidation;
 using ProductsApp.API.Products.Managers;
+using ProductsApp.API.Products.Validators;
 using ProductsApp.API.Swagger;
 using ProductsApp.API.Users.Managers;
 using ProductsApp.Infrastructure;
@@ -14,7 +16,8 @@ builder.Services
     .InstallPersistance()
     .InstallInfrastructure(builder.Configuration)
     .AddScoped<IProductsManager, ProductsManager>()
-    .AddScoped<IUserManager, UserManager>();
+    .AddScoped<IUserManager, UserManager>()
+    .AddValidatorsFromAssembly(typeof(UpdateProductRequestValidator).Assembly, includeInternalTypes: true);
 
 
 var app = builder.Build();

@@ -3,7 +3,7 @@ using ProductsApp.Infrastructure.Services;
 
 namespace ProductsApp.Tests.Proxies;
 
-public class UserServiceProxy(User user) : IUserService
+internal class UserServiceProxy(User user) : IUserService
 {
     public int? UserId { get; } = user.Id;
 

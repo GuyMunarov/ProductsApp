@@ -1,40 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProductsApp.API.Products.Managers;
+﻿using ProductsApp.API.Products.Managers;
 using ProductsApp.Domain;
-using ProductsApp.Persistance;
 using ProductsApp.Tests.Proxies;
+using static ProductsApp.Tests.TestDbUtils;
 
 namespace ProductsApp.Tests;
 
 public class ProductsManagerTests
 {
-    private AppDbContext CreateInMemoryDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("Filename=:memory:")
-            .Options;
-
-        var context = new AppDbContext(options);
-        context.Database.OpenConnection();
-        context.Database.EnsureCreated();
-
-        return context;
-    }
-
     [Fact]
     public async Task QueryProducts_FiltersByNameAndColor()
     {
         await using var context = CreateInMemoryDbContext();
 
         var user = new User("alice");
+
+        var userEntity = await context.Users.AddAsync(user);
         
-        var userEntity = context.Users.Add(user);
-
-        await context.Products.AddRangeAsync(
-            new Product("iPhone", "Black", user),
-            new Product("MacBook", "Silver", user)
-        );
-
         await context.SaveChangesAsync();
 
         var userService = new UserServiceProxy(userEntity.Entity);
@@ -57,7 +38,7 @@ public class ProductsManagerTests
 
         var userEntity = await context.Users.AddAsync(user);
         await context.Users.AddAsync(user2);
-        
+
         await context.Products.AddRangeAsync(
             new Product("iPhone", "Black", user),
             new Product("MacBook", "Silver", user2)
@@ -148,7 +129,7 @@ public class ProductsManagerTests
 
         Assert.Null(result);
     }
-    
+
     [Fact]
     public async Task CreateProduct()
     {
@@ -158,14 +139,96 @@ public class ProductsManagerTests
 
         var userEntity = await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
-        
+
         var userService = new UserServiceProxy(userEntity.Entity);
         var manager = new ProductsManager(context, userService);
-        
+
         var result = await manager.CreateProduct("iPhone", "Black", CancellationToken.None);
 
         Assert.Equal("iPhone", result.Name);
         Assert.Equal("Black", result.Color);
         Assert.Equal("alice", result.CreatedBy);
+    }
+
+    [Fact]
+    public async Task UpdateProduct_Works()
+    {
+        await using var context = CreateInMemoryDbContext();
+
+        var user = new User("alice");
+
+        var userEntity = await context.Users.AddAsync(user);
+        var productEntity = await context.Products.AddAsync(new Product("iPhone", "Black", user));
+        await context.SaveChangesAsync();
+
+        var userService = new UserServiceProxy(userEntity.Entity);
+        var manager = new ProductsManager(context, userService);
+
+        var result = await manager.UpdateProduct(productEntity.Entity.Id, "Macbook", "Silver", CancellationToken.None);
+
+        Assert.Equal("Macbook", result!.Name);
+        Assert.Equal("Silver", result.Color);
+    }
+
+    [Fact]
+    public async Task UpdateProduct_IncorrectUser()
+    {
+        await using var context = CreateInMemoryDbContext();
+
+        var user = new User("alice");
+        var user1 = new User("bob");
+
+        var userEntity1 = await context.Users.AddAsync(user1);
+
+        var productEntity = await context.Products.AddAsync(new Product("iPhone", "Black", user));
+        await context.SaveChangesAsync();
+
+        var userService = new UserServiceProxy(userEntity1.Entity);
+        var manager = new ProductsManager(context, userService);
+
+        var result = await manager.UpdateProduct(productEntity.Entity.Id, "Macbook", "Silver", CancellationToken.None);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_Works()
+    {
+        await using var context = CreateInMemoryDbContext();
+
+        var user = new User("alice");
+
+        var userEntity = await context.Users.AddAsync(user);
+
+        var productEntity = await context.Products.AddAsync(new Product("iPhone", "Black", user));
+        await context.SaveChangesAsync();
+
+        var userService = new UserServiceProxy(userEntity.Entity);
+        var manager = new ProductsManager(context, userService);
+
+        var result = await manager.DeleteProduct(productEntity.Entity.Id, CancellationToken.None);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task DeleteProduct_IncorrectUser()
+    {
+        await using var context = CreateInMemoryDbContext();
+
+        var user = new User("alice");
+        var user1 = new User("bob");
+
+        var userEntity1 = await context.Users.AddAsync(user1);
+
+        var productEntity = await context.Products.AddAsync(new Product("iPhone", "Black", user));
+        await context.SaveChangesAsync();
+
+        var userService = new UserServiceProxy(userEntity1.Entity);
+        var manager = new ProductsManager(context, userService);
+
+        var result = await manager.DeleteProduct(productEntity.Entity.Id, CancellationToken.None);
+
+        Assert.False(result);
     }
 }

@@ -16,15 +16,21 @@ public class Product : BaseEntity
         Color = color;
         CreatedById = createdById;
     }
-    
+
     public Product(string name, string color, User createdBy)
     {
         Name = name;
         Color = color;
         CreatedBy = createdBy;
     }
-    
+
     public Product(string name, string color)
+    {
+        Name = name;
+        Color = color;
+    }
+
+    public void Update(string name, string color)
     {
         Name = name;
         Color = color;

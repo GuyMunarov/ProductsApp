@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductsApp.API.Abstractation;
@@ -7,7 +8,10 @@ using ProductsApp.API.Products.Models;
 namespace ProductsApp.API.Products;
 
 [Authorize]
-public class ProductsController(IProductsManager productsManager) : BaseController
+public class ProductsController(
+    IProductsManager productsManager, 
+    IValidator<UpdateProductRequest> updateRequestValidator,
+    IValidator<CreateProductRequest> createRequestValidator) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
@@ -29,17 +33,65 @@ public class ProductsController(IProductsManager productsManager) : BaseControll
 
         return Ok(products);
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> Post([FromQuery] CreateProductRequest queryRequest,
+    public async Task<IActionResult> Post([FromQuery] CreateProductRequest request,
         CancellationToken cancellationToken)
     {
+        var validationResult = await createRequestValidator.ValidateAsync(request, cancellationToken);
+        
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToDictionary());
+        }
+        
         var product = await productsManager.CreateProduct(
-            queryRequest.Name,
-            queryRequest.Color,
+            request.Name,
+            request.Color,
             cancellationToken);
 
         return Ok(product);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(
+        int id,
+        [FromBody] UpdateProductRequest request,
+        CancellationToken cancellationToken)
+    {
+        var validationResult = await updateRequestValidator.ValidateAsync(request, cancellationToken);
+        
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToDictionary());
+        }
+        
+        var product = await productsManager.UpdateProduct(
+            id,
+            request.Name,
+            request.Color,
+            cancellationToken);
+
+        if (product is null)
+        {
+            return BadRequest();
+        }
+
+        return Ok(product);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await productsManager.DeleteProduct(
+            id,
+            cancellationToken);
+
+        return result
+            ? Ok()
+            : BadRequest();
     }
 
     [HttpGet("{id:int}")]

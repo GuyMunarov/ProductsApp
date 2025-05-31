@@ -24,9 +24,9 @@ internal class ProductsManager(AppDbContext dbContext, IUserService userService)
         var products = await dbContext.Products
             .AsNoTracking()
             .Include(x => x.CreatedBy)
-            .Where(p => EF.Functions.Collate(p.Name, "NOCASE") == name || string.IsNullOrEmpty(name))
-            .Where(p => EF.Functions.Collate(p.Color, "NOCASE") == color || string.IsNullOrEmpty(color))
-            .Where(p => EF.Functions.Collate(p.CreatedBy.Username, "NOCASE") == createdBy 
+            .Where(p => EF.Functions.Collate(p.Name.Trim(), "NOCASE") == name || string.IsNullOrEmpty(name))
+            .Where(p => EF.Functions.Collate(p.Color.Trim(), "NOCASE") == color || string.IsNullOrEmpty(color))
+            .Where(p => EF.Functions.Collate(p.CreatedBy.Username.Trim(), "NOCASE") == createdBy
                         || string.IsNullOrEmpty(createdBy))
             .Select(p => ProductMapper.Map(p))
             .ToArrayAsync(cancellationToken);
@@ -44,6 +44,44 @@ internal class ProductsManager(AppDbContext dbContext, IUserService userService)
         return addedProduct!;
     }
 
+    public async Task<ProductViewModel?> UpdateProduct(
+        int id,
+        string name,
+        string color,
+        CancellationToken cancellationToken)
+    {
+        var product = await FindUserProductById(id, cancellationToken);
+
+        if (product is null)
+        {
+            return null;
+        }
+
+        product.Update(name, color);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return ProductMapper.Map(product);
+    }
+
+    public async Task<bool> DeleteProduct(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var product = await FindUserProductById(id, cancellationToken);
+
+        if (product is null)
+        {
+            return false;
+        }
+
+        dbContext.Products.Remove(product);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
     public async Task<ProductViewModel?> GetById(int id, CancellationToken cancellationToken)
     {
         var product = await dbContext.Products
@@ -54,5 +92,14 @@ internal class ProductsManager(AppDbContext dbContext, IUserService userService)
         return product is not null
             ? ProductMapper.Map(product)
             : null;
+    }
+
+    private async Task<Product?> FindUserProductById(int id, CancellationToken cancellationToken)
+    {
+        var userProduct = await dbContext.Products
+            .Include(x => x.CreatedBy)
+            .SingleOrDefaultAsync(p => p.Id == id && p.CreatedById == userService.UserId, cancellationToken);
+
+        return userProduct;
     }
 }
