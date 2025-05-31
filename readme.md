@@ -11,17 +11,18 @@ An application that demonstrated:
 
 ## How To Test
 
-## Seeded Users
+## Authentication approaches
 
-To authenticate, you must use one of the pre-seeded usernames:
+1. Use one of the pre-seeded usernames to obtain a valid JWT:
 
 - `alice`
 - `bob`
 - `charlie`
 
-Use any of these to obtain a valid JWT.
-
 ![Login](./login.png )
+
+2. Register a new user using the api/Users/register endpoint
+
 
 After obtaining a JWT please click on the authorize button
 and paste the token inside the dialog (Do not prefix with Bearer!)
@@ -35,10 +36,12 @@ and paste the token inside the dialog (Do not prefix with Bearer!)
 
 After the tokens are set you will have access to the products endpoints.
 
-1. The api/products endpoint returns all products existing in the database.
-2. The api/products/query returns by the criteria specified in the query params
-3. the api/products/{id} gets a product by id or returns a not found response
-
+1. The api/products GET endpoint returns all products existing in the database.
+2. The api/products/query GET endpoint returns by the criteria specified in the query params
+3. The api/products/{id} GET endpoint returns a product by id or returns a not found response
+4. The api/products POST endpoint creates a product (created by will be automatically assigned to the user the JWT is issued for)
+5. The api/products/{id} PUT endpoint updates a product by id (only if the user is the one who created the product)
+6. The api/products/{id} DELETE endpoint deletes a product by id (only if the user is the one who created the product)
 
 ## Ecommerce system diagram
 
