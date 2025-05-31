@@ -38,3 +38,8 @@ After the tokens are set you will have access to the products endpoints.
 1. The api/products endpoint returns all products existing in the database.
 2. The api/products/query returns by the criteria specified in the query params
 3. the api/products/{id} gets a product by id or returns a not found response
+
+
+## Ecommerce system diagram
+
+![ecommerce](./ecommerce%20system%20diagram.png)

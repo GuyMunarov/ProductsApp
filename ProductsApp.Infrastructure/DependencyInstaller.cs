@@ -15,7 +15,9 @@ public static class DependencyInstaller
     {
         services.Configure<JwtOptions>(
                 configuration.GetSection("Jwt"))
-            .AddScoped<ITokenService, JwtTokenService>();
+            .AddHttpContextAccessor()
+            .AddScoped<ITokenService, JwtTokenService>()
+            .AddScoped<IUserService, UserService>();
 
         var jwtOptions = configuration.GetSection("Jwt").Get<JwtOptions>()!;
 

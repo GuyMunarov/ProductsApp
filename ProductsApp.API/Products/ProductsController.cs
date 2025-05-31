@@ -18,7 +18,7 @@ public class ProductsController(IProductsManager productsManager) : BaseControll
     }
 
     [HttpGet("query")]
-    public async Task<IActionResult> Get([FromQuery] ProductQueryRequest queryRequest,
+    public async Task<IActionResult> Query([FromQuery] ProductQueryRequest queryRequest,
         CancellationToken cancellationToken)
     {
         var products = await productsManager.QueryProducts(
@@ -28,6 +28,18 @@ public class ProductsController(IProductsManager productsManager) : BaseControll
             cancellationToken);
 
         return Ok(products);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Post([FromQuery] CreateProductRequest queryRequest,
+        CancellationToken cancellationToken)
+    {
+        var product = await productsManager.CreateProduct(
+            queryRequest.Name,
+            queryRequest.Color,
+            cancellationToken);
+
+        return Ok(product);
     }
 
     [HttpGet("{id:int}")]

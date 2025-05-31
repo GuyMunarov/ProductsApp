@@ -2,11 +2,31 @@
 
 public class Product : BaseEntity
 {
-    public required string Name { get; set; }
+    public string Name { get; private set; }
 
-    public required string Color { get; set; }
+    public string Color { get; private set; }
 
-    public int CreatedById { get; set; }
+    public int CreatedById { get; private set; }
 
-    public User CreatedBy { get; set; }
+    public User CreatedBy { get; private set; }
+
+    public Product(string name, string color, int createdById)
+    {
+        Name = name;
+        Color = color;
+        CreatedById = createdById;
+    }
+    
+    public Product(string name, string color, User createdBy)
+    {
+        Name = name;
+        Color = color;
+        CreatedBy = createdBy;
+    }
+    
+    public Product(string name, string color)
+    {
+        Name = name;
+        Color = color;
+    }
 }

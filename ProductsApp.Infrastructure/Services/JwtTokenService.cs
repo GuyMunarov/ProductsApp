@@ -8,10 +8,11 @@ namespace ProductsApp.Infrastructure.Services;
 
 internal class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
 {
-    public string GenerateToken(string username)
+    public string GenerateToken(int id, string username)
     {
         var claims = new[]
         {
+            new Claim(ClaimTypes.NameIdentifier, id.ToString()),
             new Claim(ClaimTypes.Name, username)
         };
 

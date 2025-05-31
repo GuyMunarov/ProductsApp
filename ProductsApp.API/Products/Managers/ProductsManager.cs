@@ -1,18 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductsApp.API.Products.Mappers;
 using ProductsApp.API.Products.Models;
+using ProductsApp.Domain;
+using ProductsApp.Infrastructure.Services;
 using ProductsApp.Persistance;
 
 namespace ProductsApp.API.Products.Managers;
 
-internal class ProductsManager(AppDbContext dbContext) : IProductsManager
+internal class ProductsManager(AppDbContext dbContext, IUserService userService) : IProductsManager
 {
     public async Task<IReadOnlyCollection<ProductViewModel>> GetAll(CancellationToken cancellationToken)
     {
         var products = await QueryProducts(null, null, null, cancellationToken);
         return products;
     }
-    
+
     public async Task<IReadOnlyCollection<ProductViewModel>> QueryProducts(
         string? name,
         string? color,
@@ -22,13 +24,24 @@ internal class ProductsManager(AppDbContext dbContext) : IProductsManager
         var products = await dbContext.Products
             .AsNoTracking()
             .Include(x => x.CreatedBy)
-            .Where(p => p.Name == name || string.IsNullOrEmpty(name))
-            .Where(p => p.Color == color || string.IsNullOrEmpty(color))
-            .Where(p => p.CreatedBy.Username == createdBy || string.IsNullOrEmpty(createdBy))
+            .Where(p => EF.Functions.Collate(p.Name, "NOCASE") == name || string.IsNullOrEmpty(name))
+            .Where(p => EF.Functions.Collate(p.Color, "NOCASE") == color || string.IsNullOrEmpty(color))
+            .Where(p => EF.Functions.Collate(p.CreatedBy.Username, "NOCASE") == createdBy 
+                        || string.IsNullOrEmpty(createdBy))
             .Select(p => ProductMapper.Map(p))
             .ToArrayAsync(cancellationToken);
 
         return products;
+    }
+
+    public async Task<ProductViewModel> CreateProduct(string name, string color, CancellationToken cancellationToken)
+    {
+        var product = new Product(name, color, userService.UserId!.Value);
+        var addedProductEntity = await dbContext.Products.AddAsync(product, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var addedProduct = await GetById(addedProductEntity.Entity.Id, cancellationToken);
+        return addedProduct!;
     }
 
     public async Task<ProductViewModel?> GetById(int id, CancellationToken cancellationToken)
@@ -38,8 +51,8 @@ internal class ProductsManager(AppDbContext dbContext) : IProductsManager
             .Include(x => x.CreatedBy)
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
 
-        return product is not null 
-            ? ProductMapper.Map(product) 
+        return product is not null
+            ? ProductMapper.Map(product)
             : null;
     }
 }

@@ -10,8 +10,4 @@ public class User : BaseEntity
     {
         Username = username;
     }
-
-    private User()
-    {
-    }
 }

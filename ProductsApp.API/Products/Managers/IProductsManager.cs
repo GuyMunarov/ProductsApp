@@ -11,6 +11,11 @@ public interface IProductsManager
         string? color,
         string? createdBy,
         CancellationToken cancellationToken);
+    
+    Task<ProductViewModel> CreateProduct(
+        string name,
+        string color,
+        CancellationToken cancellationToken);
 
     Task<ProductViewModel?> GetById(
         int id,

@@ -16,7 +16,7 @@ internal class UserManager(AppDbContext dbContext, ITokenService tokenService) :
             return null;
         }
 
-        var token = tokenService.GenerateToken(user.Username);
+        var token = tokenService.GenerateToken(user.Id, user.Username);
 
         return new TokenResponse(token);
     }

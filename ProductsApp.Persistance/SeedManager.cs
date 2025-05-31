@@ -21,20 +21,20 @@ public static class SeedManager
 
             alice.Products = new List<Product>
             {
-                new() { Name = "iPhone", Color = "Black", CreatedBy = alice },
-                new() { Name = "MacBook", Color = "Silver", CreatedBy = alice },
+                new("iPhone", "Black"),
+                new("MacBook", "Silver")
             };
 
             bob.Products = new List<Product>
             {
-                new() { Name = "Headphones", Color = "White", CreatedBy = bob },
+                new("Headphones", "White"),
             };
 
             charlie.Products = new List<Product>
             {
-                new() { Name = "Camera", Color = "Black", CreatedBy = charlie },
-                new() { Name = "Tripod", Color = "Gray", CreatedBy = charlie },
-                new() { Name = "Backpack", Color = "Blue", CreatedBy = charlie },
+                new("Camera", "Black"),
+                new("Tripod", "Gray"),
+                new("Backpack", "Blue"),
             };
 
             db.Users.AddRange(alice, bob, charlie);
