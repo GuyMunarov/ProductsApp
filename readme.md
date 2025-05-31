@@ -63,7 +63,7 @@ The API Gateway then synchronously calls the Payments Service, which:
 2. Saves Pending payment record in Payment Database
 3. Returns the payment link to the frontend for a secure IFrame checkout
 
-### 4 Payment Completion
+### 4. Payment Completion
 Once the user completes the payment, a Payment Completed callback is received via the API Gateway and forwarded to the Payments Service, which:
 1. Updates the payment status to Completed in the Payments DB.
 2. Publishes a Change Order Status Event to the Service Bus.
